@@ -38,14 +38,11 @@ export function ViewerLayers({nv,nodes,query,radius}) {
     nv.updateGLVolume();nv.drawScene()
   },[map,mode,value,percent,enabled,alpha,nv])
   return <div style={{padding:14,fontSize:13}}>
-    <label><input type="checkbox" checked={maskOnly} disabled={!mask} onChange={e=>setMaskOnly(e.target.checked)}/>只顯示遮罩內的紅點</label>
-    <p>顯示 {filtered.length} 點；隱藏 {nodes.length-filtered.length} 點。遮罩：MNI152NLin2009cAsym 2 mm；依模板判定，不代表文獻座標錯誤。</p>
     <label><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/>顯示平滑分布圖層（可選）</label>
     {enabled&&<div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:12}}>
       <label>圖層顯示門檻 <select value={mode} onChange={e=>setMode(e.target.value)}><option value="value">Value</option><option value="percentile">Percentile</option></select></label>
       {mode==='value'?<label>Value <input type="number" min="0" step="any" value={value} onChange={e=>setValue(e.target.value)}/></label>:<label>Percentile <input type="number" min="0" max="100" value={percent} onChange={e=>setPercent(e.target.value)}/></label>}
       <label>分布圖透明度 <input type="range" min="0" max="1" step="0.05" value={alpha} onChange={e=>setAlpha(Number(e.target.value))}/></label>
-      <p>只影響分布圖，不篩選文獻或紅點。Percentile 以正值體素計算；Value 為平滑座標密度值，非 p 值。FWHM 固定 10 mm。遮罩選項只篩選紅點。</p>
       {map&&!map.sorted.length&&<p>此查詢沒有非零分布圖資料。</p>}
     </div>}
     {busy&&<p role="status">載入分布圖…</p>}{error&&<p role="alert">{error}</p>}
