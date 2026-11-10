@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { apiFetch } from '../api'
+import { ViewerLayers } from './ViewerLayers'
 import { Niivue } from '@niivue/niivue'
 
 // Keep click, drag and double-click separate without blocking NiiVue's drag handlers.
@@ -98,7 +99,7 @@ function installBrainGestures(element, { toggle, pause, reset }) {
   }
 }
 
-export function BrainViewer({query = '', autoRotate = false}) {
+export function BrainViewer({query = '', autoRotate = false, radius = 6}) {
   const canvas = useRef(null), viewer = useRef(null), container = useRef(null), enlarge = useRef(null)
   const [status, setStatus] = useState('載入大腦影像中…'), [error, setError] = useState('')
   const [expanded, setExpanded] = useState(false), [rotating, setRotating] = useState(autoRotate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -118,6 +119,7 @@ export function BrainViewer({query = '', autoRotate = false}) {
       },
     })
   }, [autoRotate])
+  const [layerData,setLayerData]=useState(null)
   const [opacity, setOpacity] = useState(1)
   const [anatomyOpacity, setAnatomyOpacity] = useState(0.35)
   useEffect(() => {
@@ -162,7 +164,7 @@ export function BrainViewer({query = '', autoRotate = false}) {
         setStatus(query ? '載入文獻座標中…' : '')
         if (query) {
           // Coordinates remain in their original world (MNI millimetre) positions.
-          const res = await apiFetch(`/query/${encodeURIComponent(query)}/locations?limit=5000&offset=0&r=6`, {signal: ac.signal})
+          const res = await apiFetch(`/query/${encodeURIComponent(query)}/locations?limit=5000&offset=0&r=${radius}`, {signal: ac.signal})
           const data = await res.json(); if (disposed) return
           const rows = data.results || []
           const unique = new Map()
@@ -175,11 +177,7 @@ export function BrainViewer({query = '', autoRotate = false}) {
           const nodes = [...unique.values()].map(([x,y,z]) => ({
             name: '', x, y, z, colorValue: 1, sizeValue: 1,
           }))
-          if (nodes.length) {
-            nv.loadConnectome({name: '文獻座標', nodes, edges: [],
-              nodeColormap: 'red', nodeMinColor: 0, nodeMaxColor: 1,
-              nodeScale: 1.5, showLegend: false})
-          }
+          setLayerData({nv,nodes})
           nv.setOpacity(0, 0.35)
           setAnatomyOpacity(0.35); setOpacity(1)
           setStatus(nodes.length ? `顯示 ${nodes.length} 個不重複座標紅點。${rows.length === 5000 ? '為維持效能，目前僅載入前 5,000 筆座標，請縮小搜尋範圍查看更完整結果。' : ''}` : '此查詢沒有可顯示的腦部座標。')
@@ -189,7 +187,7 @@ export function BrainViewer({query = '', autoRotate = false}) {
     }
     load()
     return () => {disposed = true; ac.abort(); observer?.disconnect(); if (viewer.current === nv) viewer.current = null; if (loaded) nv.cleanup(); urls.forEach(url => URL.revokeObjectURL(url))}
-  }, [query, autoRotate])
+  }, [query, autoRotate, radius])
   useEffect(() => {
     if (!rotating) return
     let frame, last = 0
@@ -216,6 +214,7 @@ export function BrainViewer({query = '', autoRotate = false}) {
     <div className="brain-canvas"><canvas ref={canvas} tabIndex={0} style={{outline: 'none'}} aria-label="3D 大腦：單擊切換自動旋轉，拖曳調整視角，雙擊重設。鍵盤空白鍵切換旋轉，Home 重設。" title="單擊：旋轉／暫停；拖曳：調整視角；雙擊：重設" /></div>
     {status && <p className="brain-status" role="status">{status}</p>}{error && <p className="brain-status error" role="alert">{error}</p>}
     {!autoRotate && <div className="brain-tools"><button ref={enlarge} onClick={() => setExpanded(v => !v)}>{expanded ? '關閉放大 ×' : '放大檢視 ⤢'}</button></div>}
+    {query && layerData && <ViewerLayers key={`${query}-${radius}`} nv={layerData.nv} nodes={layerData.nodes} query={query} radius={radius}/>}
     {query && <label className="opacity">大腦透明度 <input type="range" min="0.1" max="1" step="0.05" value={anatomyOpacity} onChange={e => {setAnatomyOpacity(Number(e.target.value)); if (viewer.current?.volumes.length) viewer.current.setOpacity(0, Number(e.target.value))}} /></label>}
     {query && <label className="opacity">紅點透明度 <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => {setOpacity(Number(e.target.value)); if (viewer.current?.meshes.length) viewer.current.setMeshProperty(viewer.current.meshes[0].id, 'opacity', Number(e.target.value))}} /></label>}
   </div>
