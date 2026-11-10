@@ -1,0 +1,5 @@
+MNI152NLin2009cAsym res-02 desc-brain mask
+https://github.com/templateflow/tpl-MNI152NLin2009cAsym
+https://templateflow.s3.amazonaws.com/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii.gz
+MD5: 5c1bbc73a04d9dd5b84330d712ffd760
+Nearest-neighbour sampling using mask affine in MNI millimetres. Optional display filter, not a study exclusion criterion. Template boundary can differ from the NiiVue demonstration brain. See MASK_LICENSE.txt.
