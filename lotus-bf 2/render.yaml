@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: lotus-bf
-    runtime: docker
-    plan: free
-    healthCheckPath: /health
-    envVars:
-      - key: DB_URL
-        sync: false
