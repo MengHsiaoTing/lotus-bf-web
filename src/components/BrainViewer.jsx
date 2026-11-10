@@ -118,8 +118,8 @@ export function BrainViewer({query = '', autoRotate = false}) {
       },
     })
   }, [autoRotate])
-  const [opacity, setOpacity] = useState(0.7)
-  const [anatomyOpacity, setAnatomyOpacity] = useState(0.7)
+  const [opacity, setOpacity] = useState(1)
+  const [anatomyOpacity, setAnatomyOpacity] = useState(0.35)
   useEffect(() => {
     let disposed = false, loaded = false
     const ac = new AbortController(), urls = []
@@ -148,23 +148,10 @@ export function BrainViewer({query = '', autoRotate = false}) {
         if (disposed) return
         viewer.current = nv; nv.setSliceType(nv.sliceTypeRender)
         observer = new ResizeObserver(() => {if (!disposed) nv.resizeListener()}); observer.observe(container.current)
-        await nv.loadVolumes([
-          autoRotate
-            ? {
-                // 入口：使用官網較細緻的腦圖
-                url: `${import.meta.env.BASE_URL}static/mni152.nii.gz`,
-                name: 'mni152.nii.gz',
-                colormap: 'gray',
-                cal_min: 30,
-                cal_max: 80,
-              }
-            : {
-                // 搜尋結果：保留原本的模板
-                url: `${import.meta.env.BASE_URL}static/mni_2mm.nii.gz`,
-                name: 'mni_2mm.nii.gz',
-                colormap: 'gray',
-              },
-        ])
+        await nv.loadVolumes([{
+          url: `${import.meta.env.BASE_URL}static/mni152.nii.gz`,
+          name: 'mni152.nii.gz', colormap: 'gray', cal_min: 30, cal_max: 80,
+        }])
         if (disposed) return
         nv.setRenderAzimuthElevation(120, 15)
         if (autoRotate) {
@@ -172,19 +159,30 @@ export function BrainViewer({query = '', autoRotate = false}) {
           await nv.setVolumeRenderIllumination(0)
           if (disposed) return
         }
-        setStatus(query ? '載入搜尋結果圖層中…' : '')
+        setStatus(query ? '載入文獻座標中…' : '')
         if (query) {
-          const res = await apiFetch(`/query/${encodeURIComponent(query)}/nii?fwhm=10&kernel=gauss&r=6`, {signal: ac.signal})
-          if (res.headers.get('X-Coordinate-Count') === '0') {
-            if (!disposed) setStatus('此查詢沒有可顯示的腦部座標。')
-            return
+          // Coordinates remain in their original world (MNI millimetre) positions.
+          const res = await apiFetch(`/query/${encodeURIComponent(query)}/locations?limit=5000&offset=0&r=6`, {signal: ac.signal})
+          const data = await res.json(); if (disposed) return
+          const rows = data.results || []
+          const unique = new Map()
+          for (const row of rows) {
+            const point = [row.x, row.y, row.z]
+            if (point.every(v => typeof v === 'number' && Number.isFinite(v))) {
+              unique.set(point.join(','), point)
+            }
           }
-          const blob = await res.blob(); if (disposed) return
-          const url = URL.createObjectURL(blob); urls.push(url)
-          await nv.addVolumeFromUrl({url, name:'query.nii.gz', colormap:'hot', opacity:0.7})
-          if (disposed) return
-          nv.setOpacity(0, 0.7)
-          setStatus('')
+          const nodes = [...unique.values()].map(([x,y,z]) => ({
+            name: '', x, y, z, colorValue: 1, sizeValue: 1,
+          }))
+          if (nodes.length) {
+            nv.loadConnectome({name: '文獻座標', nodes, edges: [],
+              nodeColormap: 'red', nodeMinColor: 0, nodeMaxColor: 1,
+              nodeScale: 1.5, showLegend: false})
+          }
+          nv.setOpacity(0, 0.35)
+          setAnatomyOpacity(0.35); setOpacity(1)
+          setStatus(nodes.length ? `顯示 ${nodes.length} 個不重複座標紅點。${rows.length === 5000 ? '為維持效能，目前僅載入前 5,000 筆座標，請縮小搜尋範圍查看更完整結果。' : ''}` : '此查詢沒有可顯示的腦部座標。')
         }
       } catch(e) {if (!disposed) {setError(`${e.message}；可繼續使用文獻搜尋。`); setStatus('')}}
       finally {loaded = true; if (disposed) nv.cleanup()}
@@ -219,6 +217,6 @@ export function BrainViewer({query = '', autoRotate = false}) {
     {status && <p className="brain-status" role="status">{status}</p>}{error && <p className="brain-status error" role="alert">{error}</p>}
     {!autoRotate && <div className="brain-tools"><button ref={enlarge} onClick={() => setExpanded(v => !v)}>{expanded ? '關閉放大 ×' : '放大檢視 ⤢'}</button></div>}
     {query && <label className="opacity">大腦透明度 <input type="range" min="0.1" max="1" step="0.05" value={anatomyOpacity} onChange={e => {setAnatomyOpacity(Number(e.target.value)); if (viewer.current?.volumes.length) viewer.current.setOpacity(0, Number(e.target.value))}} /></label>}
-    {query && <label className="opacity">圖層透明度 <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => {setOpacity(Number(e.target.value)); if (viewer.current?.volumes.length > 1) viewer.current.setOpacity(1, Number(e.target.value))}} /></label>}
+    {query && <label className="opacity">紅點透明度 <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => {setOpacity(Number(e.target.value)); if (viewer.current?.meshes.length) viewer.current.setMeshProperty(viewer.current.meshes[0].id, 'opacity', Number(e.target.value))}} /></label>}
   </div>
 }
