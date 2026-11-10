@@ -83,7 +83,7 @@ export default function App() {
         </h1>
 
         <BrainViewer autoRotate />
-        <p className="muted">建議使用 Chrome、Edge 或 Firefox，以獲得較佳的 3D 瀏覽體驗。首次載入腦圖請稍候。</p>
+        <p className="muted">建議使用 Chrome、Edge 或 Firefox，以獲得較佳的 3D 瀏覽體驗。</p>
 
         <div className="entry-buttons" style={{display:'flex',justifyContent:'center',flexWrap:'wrap',gap:20}}>
           <button className="primary enter" onClick={() => navigate('search', '', 'terms')}>詞彙查詢</button>
