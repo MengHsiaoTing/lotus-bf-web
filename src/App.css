@@ -1,0 +1,745 @@
+/* =========================
+   整體頁面與頁首
+   ========================= */
+
+.app {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.site-header {
+  min-height: clamp(76px, 6.5vw, 110px);
+  padding: clamp(16px, 1.5vw, 26px)
+           clamp(20px, 3vw, 64px);
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2vw, 40px);
+  background: #fff;
+  border-bottom: 1px solid #dce5ec;
+}
+
+.brand {
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none !important;
+
+  font-size: clamp(28px, 2.3vw, 36px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+.brand span {
+  color: #138a97;
+}
+
+.tagline {
+  min-width: 0;
+  font-size: clamp(13px, 1.05vw, 20px);
+  line-height: 1.5;
+  color: #728596;
+  white-space: nowrap;
+}
+
+.site-header > .quiet {
+  margin-left: auto;
+}
+
+.eyebrow {
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #168391;
+}
+
+.intro {
+  color: #758697;
+}
+
+.muted {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: #728596;
+}
+
+.error {
+  color: #b73d41;
+}
+
+footer {
+  padding: 30px 20px;
+  text-align: center;
+  font-size: 11px;
+  color: #8397a7;
+}
+
+
+/* =========================
+   共用按鈕
+   ========================= */
+
+.primary {
+  background: #12778a;
+  border-color: #12778a;
+  color: #fff;
+  font-weight: 600;
+}
+
+.primary:hover:not(:disabled) {
+  background: #0b6275;
+}
+
+.quiet {
+  background: transparent;
+  border-color: transparent;
+}
+
+
+/* =========================
+   黑色入口頁與頁首
+   ========================= */
+
+.app--home {
+  background: #000;
+  color: #eefaff;
+}
+
+.app--home .site-header {
+  position: relative;
+  z-index: 2;
+  background: #000;
+  border-bottom: 1px solid rgba(100, 220, 230, 0.12);
+}
+
+.app--home .brand {
+  color: #eefaff;
+}
+
+.app--home .brand span {
+  color: #44d5df;
+}
+
+.app--home .tagline {
+  color: #96adb8;
+}
+
+.app--home footer {
+  display: none;
+}
+
+
+/* =========================
+   入口內容與神經網絡背景
+   ========================= */
+
+.landing {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-height: calc(100dvh - 90px);
+  margin: 0;
+  padding: 36px 20px 48px;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.neural-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  text-align: center;
+}
+
+.app--home .eyebrow {
+  margin: 0 0 clamp(12px, 1.4vw, 24px);
+
+  font-size: clamp(20px, 2.3vw, 44px);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.14em;
+
+  color: #72e5ed;
+}
+
+
+/* =========================
+   入口的兩個搜尋按鈕
+   ========================= */
+
+.entry-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.app--home .enter {
+  min-width: 250px;
+  max-width: 100%;
+  margin: 0;
+  padding: 14px 32px;
+
+  background: #087e90;
+  border: 1px solid #38cbd9;
+  color: #eaffff;
+  box-shadow: 0 0 24px rgba(40, 205, 220, 0.18);
+}
+
+.app--home .enter:hover:not(:disabled) {
+  background: #1096a8;
+}
+
+
+/* =========================
+   搜尋頁
+   ========================= */
+
+.search-page {
+  max-width: 850px;
+  margin: 80px auto 120px;
+  padding: 0 24px;
+}
+
+.search-page > h1,
+.search-page > .intro,
+.search-page > .eyebrow {
+  text-align: center;
+}
+
+.search-form {
+  position: relative;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #dce5ec;
+  border-radius: 14px;
+  text-align: left;
+  box-shadow: 0 8px 32px #16344c06;
+}
+
+.search-form > label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* =========================
+   詞彙搜尋欄
+   ========================= */
+
+.search-row {
+  display: flex;
+  gap: 10px;
+}
+
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-input-wrap input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #b8cdd7;
+  border-radius: 8px;
+}
+
+.search-row > .primary {
+  padding: 10px 24px;
+}
+
+.operators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.operators button {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.examples {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 12px;
+  color: #7b8a96;
+}
+
+.examples button {
+  border: 1px solid #dce5ec;
+}
+
+
+/* =========================
+   詞彙自動完成
+   ========================= */
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+
+  max-height: 290px;
+  overflow: auto;
+  margin: 5px 0;
+  padding: 6px;
+
+  list-style: none;
+  background: #fff;
+  border: 1px solid #c9dce4;
+  border-radius: 8px;
+  box-shadow: 0 12px 24px #18354922;
+}
+
+.suggestions li {
+  padding: 8px 12px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.suggestions li:hover,
+.suggestions li[aria-selected="true"] {
+  background: #e7f4f5;
+}
+
+
+/* =========================
+   座標搜尋欄
+   ========================= */
+
+.coordinate-label {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.coordinate-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.coordinate-fields label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.coordinate-fields input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+
+  background: #fff;
+  border: 1px solid #b8cdd7;
+  border-radius: 8px;
+  color: #19324b;
+  font-size: 16px;
+}
+
+.coordinate-submit {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 28px;
+}
+
+
+/* =========================
+   搜尋結果版面
+   ========================= */
+
+.results-page {
+  max-width: 1500px;
+  margin: auto;
+  padding: 28px clamp(16px, 3vw, 48px);
+}
+
+.query-caption {
+  margin: 22px 0 16px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 22px;
+}
+
+.card {
+  min-width: 0;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid #dce5ec;
+  border-radius: 14px;
+  overflow-wrap: anywhere;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-heading h2 {
+  margin: 0;
+}
+
+.section-heading label {
+  font-size: 12px;
+}
+
+.section-heading select {
+  max-width: 100%;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #dce5ec;
+  border-radius: 6px;
+}
+
+
+/* =========================
+   文獻卡片與分頁
+   ========================= */
+
+.study {
+  padding: 22px 0;
+  border-bottom: 1px solid #e5edf2;
+}
+
+.study-meta {
+  margin-bottom: 7px;
+  font-size: 12px;
+  color: #6d8495;
+}
+
+.study h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.study > p:not(.study-meta) {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #657b8d;
+}
+
+.pubmed {
+  font-size: 12px;
+  color: #12818b;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  font-size: 13px;
+}
+
+
+/* =========================
+   共用 3D 腦圖
+   ========================= */
+
+.brain-panel {
+  position: sticky;
+  top: 20px;
+}
+
+.brain-viewer {
+  overflow: hidden;
+  background: #091321;
+  border-radius: 12px;
+  color: #e0ebf5;
+}
+
+.brain-canvas {
+  position: relative;
+  height: 360px;
+  min-width: 0;
+}
+
+.brain-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  outline: none;
+}
+
+.brain-canvas canvas:focus,
+.brain-canvas canvas:focus-visible {
+  outline: none;
+}
+
+.brain-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px;
+}
+
+.brain-tools button {
+  padding: 6px 10px;
+  background: #182d40;
+  border-color: #30485c;
+  color: #e0ebf5;
+  font-size: 11px;
+}
+
+.brain-tools button:hover:not(:disabled) {
+  background: #254359;
+}
+
+.brain-status {
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.opacity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 14px;
+  font-size: 12px;
+}
+
+.opacity input {
+  flex: 1;
+  min-width: 0;
+}
+
+
+/* =========================
+   入口專用的 3D 腦圖外觀
+   ========================= */
+
+.app--home .brain-viewer {
+  width: min(100%, 1000px);
+  margin: 0 auto 20px;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.app--home .brain-canvas {
+  height: clamp(340px, 58vh, 650px);
+
+  /* 覆蓋 NiiVue 加入的行內背景 */
+  background: transparent !important;
+}
+
+.app--home .brain-tools {
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.app--home .brain-tools button {
+  background: rgba(8, 22, 28, 0.8);
+  border: 1px solid rgba(90, 190, 205, 0.25);
+  color: #a8c8d2;
+}
+
+.app--home .brain-tools button:hover:not(:disabled) {
+  background: rgba(20, 55, 65, 0.9);
+}
+
+
+/* =========================
+   腦圖放大檢視
+   ========================= */
+
+.expanded {
+  position: fixed;
+  inset: 20px;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #426078;
+  box-shadow: 0 0 0 100vmax #06111ee8;
+}
+
+.expanded .brain-canvas {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+
+/* =========================
+   平板與較窄螢幕
+   ========================= */
+
+@media (max-width: 900px) {
+  .results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brain-panel {
+    position: static;
+  }
+
+  .brain-canvas {
+    height: 420px;
+  }
+}
+
+@media (max-width: 700px) {
+  .tagline {
+    white-space: normal;
+  }
+}
+
+
+/* =========================
+   手機
+   ========================= */
+
+@media (max-width: 540px) {
+  .site-header {
+    min-height: 70px;
+    padding: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tagline {
+    display: none;
+  }
+
+  /* 手機入口仍顯示網站全名 */
+  .app--home .site-header {
+    flex-wrap: nowrap;
+    gap: 14px;
+  }
+
+  .app--home .brand {
+    font-size: 28px;
+  }
+
+  .app--home .tagline {
+    display: block;
+    font-size: 11px;
+    line-height: 1.5;
+    white-space: normal;
+  }
+
+
+  .landing {
+    min-height: calc(100dvh - 70px);
+    padding: 28px 12px 36px;
+  }
+
+  .app--home .eyebrow {
+    font-size: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  .app--home .brain-canvas {
+    height: 380px;
+  }
+
+  .entry-buttons {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .app--home .enter {
+    width: min(100%, 300px);
+    min-width: 0;
+  }
+
+  .search-page {
+    margin: 48px auto;
+    padding: 0 16px;
+  }
+
+  .search-form,
+  .card {
+    padding: 16px;
+  }
+
+  .search-row > .primary {
+    padding: 10px 15px;
+  }
+
+  .search-input-wrap input {
+    padding: 12px 10px;
+    font-size: 16px;
+  }
+
+  .coordinate-fields {
+    gap: 10px;
+  }
+
+  .coordinate-fields input {
+    padding: 10px 6px;
+  }
+
+  .results-page {
+    padding: 20px 12px;
+  }
+
+  .study h3 {
+    font-size: 17px;
+  }
+
+  .brain-canvas {
+    height: 300px;
+  }
+
+  .expanded {
+    inset: 8px;
+  }
+}
+
+
+/* =========================
+   減少動畫偏好
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .neural-signals {
+    display: none;
+  }
+}
