@@ -68,14 +68,7 @@ export default function App() {
         <span>Location-or-Term Unified Search for Brain Functions</span>
       </span>
 
-      {route.page === 'results' && (
-        <button
-          className="quiet"
-          onClick={() => navigate('search', '', route.mode)}
-        >
-          新的搜尋
-        </button>
-      )}
+
     </header>
     {route.page === 'home' ? <main className="landing">
       <NeuralBackground />
@@ -103,7 +96,7 @@ export default function App() {
 
       {route.page === 'results' && <>
         <p className="query-caption">搜尋結果：<strong>{route.q}</strong></p>
-        <div className="results-grid"><section className="card"><Studies key={`${route.q}-${route.revision || 0}`} query={route.q} /></section><aside className="card brain-panel"><h2>3D 腦影像</h2><BrainViewer key={`${route.q}-${route.revision || 0}`} query={route.q} /><p className="muted">拖曳旋轉，滾輪縮放。彩色圖層為搜尋座標產生的平滑分布，並非統計顯著性圖。</p></aside></div>
+        <div className="results-grid"><section className="card"><Studies key={`${route.q}-${route.revision || 0}`} query={route.q} /></section><aside className="card brain-panel"><h2>3D 腦影像</h2><BrainViewer key={`${route.q}-${route.revision || 0}`} query={route.q} /><p className="muted">拖曳旋轉，滾輪縮放。紅點為文獻報告的 MNI 座標；可降低大腦透明度查看內部紅點，並非統計顯著性圖。</p></aside></div>
       </>}
     </main>}
   </div>
