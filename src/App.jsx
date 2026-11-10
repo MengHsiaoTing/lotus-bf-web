@@ -27,7 +27,6 @@ function CoordinateSearch({ query, radius, onSearch, showPicker }) {
       <p className="muted">搜尋具有活化點距離此位置小於指定半徑的文獻。圖層門檻與遮罩不影響文獻篩選。</p>
     </form>
     {showPicker && <section className="card" style={{marginTop:20}}><h2>選擇搜尋位置</h2>
-      <BrainViewer />
       <SlicePicker point={point} onChange={p=>setCoords(p.map(String))}/>
     </section>}
   </>
