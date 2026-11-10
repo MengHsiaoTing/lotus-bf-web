@@ -137,7 +137,7 @@ export function BrainViewer({query = '', autoRotate = false}) {
 
       // 依螢幕像素密度繪製
       isResizeCanvas: true,
-      forceDevicePixelRatio: 0,
+      forceDevicePixelRatio: 1,
     })
     let observer
     async function load() {
