@@ -26,18 +26,18 @@ class QueryError(ValueError):
 
 def parse_query(query):
     if not query.strip() or len(query) > 1200:
-        raise QueryError('請輸入 1–1200 字元的查詢。')
+        raise QueryError('Enter a query of 1–1200 characters.')
     tokens, pos = [], 0
     while pos < len(query):
         if not query[pos:].strip():
             break
         match = TOKEN.match(query, pos)
         if not match:
-            raise QueryError('引號或座標括號未成對。')
+            raise QueryError('Unmatched quotation marks or coordinate brackets.')
         tokens.append(match.group(1))
         pos = match.end()
     if len(tokens) > 100:
-        raise QueryError('查詢過長，請減少詞彙或括號。')
+        raise QueryError('Query too long. Use fewer terms or parentheses.')
     index = 0
 
     def peek():
@@ -47,30 +47,30 @@ def parse_query(query):
         nonlocal index
         token = peek()
         if token is None:
-            raise QueryError('運算符號後面缺少詞彙或座標。')
+            raise QueryError('Missing term or coordinate after an operator.')
         if token == '(':
             index += 1
             node = disjunction()
             if peek() != ')':
-                raise QueryError('缺少右括號 )。')
+                raise QueryError('Missing closing parenthesis ).')
             index += 1
             return node
         if token in ('AND', 'OR', 'NOT', ')'):
-            raise QueryError('請檢查 AND、OR、NOT 與括號的位置。')
+            raise QueryError('Check AND, OR, NOT and parentheses.')
         raw = tokens[index]
         index += 1
         if raw.startswith('['):
             try:
                 coords = tuple(float(v.strip()) for v in raw[1:-1].split(','))
             except ValueError:
-                raise QueryError('座標需為三個數字，例如 [-22,0,-20]。') from None
+                raise QueryError('Coordinates must contain three numbers, e.g. [-22,0,-20].') from None
             if len(coords) != 3 or not all(math.isfinite(v) and abs(v) <= 1000 for v in coords):
-                raise QueryError('座標需為三個有限數字，範圍為 -1000 至 1000 mm。')
+                raise QueryError('Coordinates must be three finite numbers between -1000 and 1000 mm.')
             return ('point', coords)
         phrase = raw.startswith('"')
         word = raw[1:-1] if phrase else raw
         if not word.strip():
-            raise QueryError('詞彙不可為空白。')
+            raise QueryError('A term cannot be empty.')
         return ('phrase' if phrase else 'term', word.strip())
 
     def unary():
@@ -99,7 +99,7 @@ def parse_query(query):
 
     result = disjunction()
     if index != len(tokens):
-        raise QueryError('多餘的右括號 )。')
+        raise QueryError('Unexpected closing parenthesis ).')
     return result
 
 
@@ -143,9 +143,9 @@ def number_arg(name, default, minimum, maximum, integer=False):
     try:
         value = (int if integer else float)(request.args.get(name, default))
     except (ValueError, TypeError):
-        raise QueryError(f'{name} 需為有效數字。') from None
+        raise QueryError(f'{name} must be a valid number.') from None
     if not math.isfinite(value) or not minimum <= value <= maximum:
-        raise QueryError(f'{name} 範圍為 {minimum}–{maximum}。')
+        raise QueryError(f'{name} must be between {minimum} and {maximum}.')
     return value
 
 
@@ -190,12 +190,12 @@ def create_api(get_engine):
     @bp.errorhandler(SQLAlchemyError)
     def db_error(error):
         current_app.logger.warning('Query database error (%s)', type(error).__name__)
-        return jsonify(error='資料庫查詢失敗或逾時；請檢查資料庫連線及 /health/db。'), 503
+        return jsonify(error='Database query failed or timed out. Check the connection and /health/db.'), 503
 
     @bp.errorhandler(RuntimeError)
     def configuration_error(error):
         current_app.logger.warning('Backend configuration error (%s)', type(error).__name__)
-        return jsonify(error='後端尚未設定完成，請確認 DB_URL。'), 503
+        return jsonify(error='Backend setup is incomplete. Check DB_URL.'), 503
 
     @bp.get('/health')
     def health():
@@ -223,7 +223,7 @@ def create_api(get_engine):
         offset = number_arg('offset', 0, 0, 1000000, integer=True)
         sort = request.args.get('sort', 'desc')
         if sort not in ('asc', 'desc'):
-            raise QueryError('sort 僅接受 asc 或 desc。')
+            raise QueryError('sort must be asc or desc.')
         cte, params = compile_query(query, radius)
         params.update(limit=limit, offset=offset)
         with get_engine().begin() as conn:
@@ -256,9 +256,9 @@ def create_api(get_engine):
         fwhm = number_arg('fwhm', 10, 0, 30)
         kernel = request.args.get('kernel', 'gauss').lower()
         if kernel not in ('gauss', 'none'):
-            raise QueryError('kernel 僅接受 gauss 或 none。')
+            raise QueryError('kernel must be gauss or none.')
         if 'voxel' in request.args and number_arg('voxel', 2, 2, 2) != 2:
-            raise QueryError('目前影像固定使用 2 mm 網格。')
+            raise QueryError('Maps currently use a fixed 2 mm grid.')
         template = ROOT / 'public' / 'static' / 'mni_2mm.nii.gz'
         with get_engine().connect() as conn:
             rows = conn.execution_options(stream_results=True).execute(text(sql), params)

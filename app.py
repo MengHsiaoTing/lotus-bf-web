@@ -33,7 +33,7 @@ def create_app():
     def health():
         return """
         <!DOCTYPE html>
-        <html lang="zh-Hant">
+        <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport"
@@ -43,11 +43,11 @@ def create_app():
         <body>
             <h1>Neurosynth API Server</h1>
             <p>
-                使用 Flask 與 PostgreSQL 查詢 Neurosynth 資料，
-                找出符合條件 A、但不符合條件 B 的研究。
+                Query Neurosynth data with Flask and PostgreSQL.
+                Find studies that match A but not B.
             </p>
 
-            <h2>詞彙查詢</h2>
+            <h2>Term search</h2>
             <p>
                 A：posterior cingulate<br>
                 B：ventromedial prefrontal
@@ -55,17 +55,17 @@ def create_app():
             <ul>
                 <li>
                     <a href="/dissociate/terms/posterior_cingulate/ventromedial_prefrontal">
-                        A − B：包含 A 詞彙、排除 B 詞彙
+                        A − B：includes term A, excludes term B
                     </a>
                 </li>
                 <li>
                     <a href="/dissociate/terms/ventromedial_prefrontal/posterior_cingulate">
-                        B − A：包含 B 詞彙、排除 A 詞彙
+                        B − A：includes term B, excludes term A
                     </a>
                 </li>
             </ul>
 
-            <h2>MNI 座標查詢</h2>
+            <h2>MNI coordinate search</h2>
             <p>
                 A：[0, -52, 26]<br>
                 B：[-2, 50, -6]
@@ -73,28 +73,28 @@ def create_app():
             <ul>
                 <li>
                     <a href="/dissociate/locations/0_-52_26/-2_50_-6">
-                        A − B：有 A 座標紀錄、沒有 B 座標紀錄
+                        A − B：has coordinates A, excludes coordinates B
                     </a>
                 </li>
                 <li>
                     <a href="/dissociate/locations/-2_50_-6/0_-52_26">
-                        B − A：有 B 座標紀錄、沒有 A 座標紀錄
+                        B − A：has coordinates B, excludes coordinates A
                     </a>
                 </li>
             </ul>
 
-            <h2>圖片與資料庫檢查</h2>
+            <h2>Image and database checks</h2>
             <ul>
-                <li><a href="/img">查看杏仁核圖片</a></li>
-                <li><a href="/test_db">查看資料庫連線與資料筆數</a></li>
+                <li><a href="/img">View amygdala image</a></li>
+                <li><a href="/test_db">Check database connection and record counts</a></li>
             </ul>
 
-            <h2>查詢說明</h2>
+            <h2>Query notes</h2>
             <ul>
-                <li>詞彙查詢依據資料庫中的詞彙標註，權重大於 0。</li>
-                <li>座標採完全匹配，不包含附近範圍。</li>
-                <li>結果以 JSON 格式顯示，最多列出 100 筆研究資料。</li>
-                <li>total_studies 表示符合條件的研究總數。</li>
+                <li>Term queries use annotations with weights greater than zero.</li>
+                <li>Legacy coordinate queries require exact matches.</li>
+                <li>Results are JSON with up to 100 studies.</li>
+                <li>total_studies is the total number of matching studies.</li>
             </ul>
         </body>
         </html>
@@ -104,7 +104,7 @@ def create_app():
     def show_img():
         image = Path(__file__).resolve().parent / 'legacy-assets' / 'amygdala.gif'
         if not image.is_file():
-            return jsonify(error='若要保留上週的 GIF 展示，請將原本的 amygdala.gif 放入 legacy-assets。'), 404
+            return jsonify(error='Place amygdala.gif in legacy-assets to enable the legacy demonstration.'), 404
         return send_file(image, mimetype="image/gif")
 
     @app.get("/terms/<term>/studies", endpoint="terms_studies")
@@ -162,7 +162,7 @@ def create_app():
 
         except Exception as e:
             app.logger.warning("Database check failed (%s)", type(e).__name__)
-            payload["error"] = "資料庫無法讀取，請確認 DB_URL、資料表及資料庫狀態。"
+            payload["error"] = "Cannot read the database. Check DB_URL, tables and database status."
             return jsonify(payload), 500
         # 將查到的研究 ID 配上研究標題、作者、年份等資料。
     def study_results(conn, query, params):
@@ -260,7 +260,7 @@ def create_app():
             x2, y2, z2 = map(int, coords_b.split("_"))
         except ValueError:
             return jsonify({
-                "error": "座標需為三個整數，以底線分隔，例如 0_-52_26"
+                "error": "Coordinates must be three underscore-separated integers, e.g. 0_-52_26"
             }), 400
 
         # 此版本採用座標完全相符，不額外加入搜尋半徑。
@@ -323,7 +323,7 @@ def create_app():
     @app.errorhandler(OperationalError)
     def database_unavailable(error):
         app.logger.warning('Database operation failed (%s)', type(error).__name__)
-        return jsonify(error='資料庫暫時無法連線，請稍後重試。'), 503
+        return jsonify(error='The database is temporarily unavailable. Please try again later.'), 503
 
     return app
 
