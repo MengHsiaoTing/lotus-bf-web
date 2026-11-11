@@ -6,6 +6,7 @@ function Slice({volume,point,onChange,plane,points,overlay,threshold,overlayAlph
   const ref=useRef(null), size=280
   const bounds=volumeBounds(volume)
   const [loH,hiH]=bounds[plane.h], [loV,hiV]=bounds[plane.v]
+  const aspect=(hiH-loH)/(hiV-loV)
   useEffect(()=>{
     const ctx=ref.current.getContext('2d'), img=ctx.createImageData(size,size)
     for(let y=0;y<size;y++) for(let x=0;x<size;x++) {
@@ -13,7 +14,7 @@ function Slice({volume,point,onChange,plane,points,overlay,threshold,overlayAlph
       const val=Math.max(0,Math.min(255,sample(volume,xyz)/100*255)), i=(y*size+x)*4
       const hot=overlay?sample(overlay,xyz):0
       const alpha=hot>0&&hot>=threshold?overlayAlpha:0
-      img.data.set([val*(1-alpha)+255*alpha,val*(1-alpha),val*(1-alpha),255],i)
+      img.data.set([val*(1-alpha)+255*alpha,val*(1-alpha)+255*alpha,val*(1-alpha),255],i)
     }
     ctx.putImageData(img,0,0)
     ctx.globalAlpha=pointAlpha;ctx.fillStyle='#ff3030'
@@ -29,7 +30,7 @@ function Slice({volume,point,onChange,plane,points,overlay,threshold,overlayAlph
     ctx.fillStyle='white';ctx.font='14px sans-serif';ctx.fillText(plane.left,6,size/2);ctx.fillText(plane.right,size-17,size/2)
   },[volume,point,plane,loH,hiH,loV,hiV,points,overlay,threshold,overlayAlpha,pointAlpha])
   function select(e){const r=e.currentTarget.getBoundingClientRect();onChange(sliceLocation(point,plane,bounds,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height))}
-  return <div><p>{plane.title}</p><canvas width={size} height={size} ref={ref} onPointerDown={select} style={{width:'100%',aspectRatio:`${hiH-loH}/${hiV-loV}`,cursor:'crosshair',display:'block'}} aria-label={`${plane.title}. Use the coordinate fields or slider for keyboard selection.`}/>
+  return <div><p>{plane.title}</p><div className="slice-frame"><canvas width={size} height={size} ref={ref} onPointerDown={select} style={{width:`${Math.min(1,aspect)*100}%`,height:`${Math.min(1,1/aspect)*100}%`,cursor:'crosshair',display:'block'}} aria-label={`${plane.title}. Use the coordinate fields or slider for keyboard selection.`}/></div>
     <input className="slice-slider" aria-label={`${plane.title} slice position`} type="range" min={Math.ceil(bounds[plane.f][0])} max={Math.floor(bounds[plane.f][1])} step="1" value={point[plane.f]} onChange={e=>onChange(point.map((v,i)=>i===plane.f?Number(e.target.value):v))}/>
   </div>
 }

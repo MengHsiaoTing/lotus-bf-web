@@ -20,7 +20,8 @@ export function ViewerLayers({nv,nodes,query,radius}) {
     apiFetch(`/query/${encodeURIComponent(query)}/nii?r=${radius}&fwhm=10&kernel=gauss`,{signal:ac.signal}).then(async res=>{
       const blob=await res.blob();if(!active)return
       url=URL.createObjectURL(blob)
-      const volume=await nv.addVolumeFromUrl({url,name:'distribution.nii.gz',colormap:'red',opacity:0})
+      nv.addColormap('lotus-yellow',{R:[255,255],G:[255,255],B:[0,0],A:[0,255],I:[0,255]})
+      const volume=await nv.addVolumeFromUrl({url,name:'distribution.nii.gz',colormap:'lotus-yellow',opacity:0})
       if(!active){nv.removeVolume(volume);return}
       const sorted=Array.from(volume.img,v=>Number(v)*(volume.hdr.scl_slope||1)+(volume.hdr.scl_inter||0)).filter(v=>Number.isFinite(v)&&v>0).sort((a,b)=>a-b)
       setMap({volume,sorted});setBusy(false)
