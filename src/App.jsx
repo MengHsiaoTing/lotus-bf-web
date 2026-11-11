@@ -83,7 +83,6 @@ export default function App() {
         </h1>
 
         <BrainViewer autoRotate />
-        <p className="muted">Chrome, Edge or Firefox is recommended for the best 3D viewing experience.</p>
 
         <div className="entry-buttons" style={{display:'flex',justifyContent:'center',flexWrap:'wrap',gap:20}}>
           <button className="primary enter" onClick={() => navigate('search', '', 'terms')}>Term search</button>
