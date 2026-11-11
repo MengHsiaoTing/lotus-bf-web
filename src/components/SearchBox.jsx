@@ -3,7 +3,7 @@ import './SearchBox.css'
 
 function TermMarquee({terms, onChoose}) {
   if (!terms.length) return null
-  return <div className="term-marquee" role="region" aria-label="可左右滑動的搜尋詞彙" tabIndex={0}>
+  return <div className="term-marquee" role="region" aria-label="Scrollable search terms" tabIndex={0}>
     <div className="term-marquee-track"><div className="term-marquee-group">
       {terms.map(term => <button type="button" className="term-marquee-word" key={term}
         onClick={() => onChoose(term)}>{term}</button>)}
@@ -17,7 +17,7 @@ export function SearchBox({value, onChange, onSearch, showMarquee = false}) {
     'memory', 'attention', 'emotion', 'language',
     'learning', 'vision', 'motor', 'cognition'
   ])
-  const [status, setStatus] = useState('載入詞彙中…')
+  const [status, setStatus] = useState('Loading terms…')
   const [cursor, setCursor] = useState(value.length)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
@@ -29,7 +29,7 @@ export function SearchBox({value, onChange, onSearch, showMarquee = false}) {
       const list = [...new Set((data.terms || []).filter(t => typeof t === 'string' && t.trim()).map(t => t.trim()))]
       if (list.length) setTerms(list.sort((a, b) => a.localeCompare(b, 'en')))
       setStatus('')
-    }).catch(e => { if (e.name !== 'AbortError') setStatus('目前顯示常用詞彙，可左右滑動並點選。') })
+    }).catch(e => { if (e.name !== 'AbortError') setStatus('Showing common terms. Scroll sideways and click to add a term.') })
     return () => ac.abort()
   }, [])
   const before = value.slice(0, cursor)
@@ -64,17 +64,17 @@ export function SearchBox({value, onChange, onSearch, showMarquee = false}) {
     })
   }
   return <><form className="search-form" onSubmit={e => {e.preventDefault(); if (value.trim()) {setOpen(false); onSearch(value.trim())}}}>
-    <label htmlFor="query">搜尋文獻與腦功能</label>
+    <label htmlFor="query">Search studies and brain functions</label>
     <div className="search-row"><div className="search-input-wrap">
-      <input id="query" ref={input} role="combobox" aria-autocomplete="list" aria-expanded={open && suggestions.length > 0} aria-controls="term-options" aria-activedescendant={open && active >= 0 ? `term-${active}` : undefined} autoComplete="off" value={value} placeholder="例如：memory AND attention" onChange={e => {onChange(e.target.value); setCursor(e.target.selectionStart); setOpen(true); setActive(-1)}} onSelect={e => setCursor(e.target.selectionStart)} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={e => {
+      <input id="query" ref={input} role="combobox" aria-autocomplete="list" aria-expanded={open && suggestions.length > 0} aria-controls="term-options" aria-activedescendant={open && active >= 0 ? `term-${active}` : undefined} autoComplete="off" value={value} placeholder="e.g. memory AND attention" onChange={e => {onChange(e.target.value); setCursor(e.target.selectionStart); setOpen(true); setActive(-1)}} onSelect={e => setCursor(e.target.selectionStart)} onFocus={() => setOpen(true)} onBlur={() => setOpen(false)} onKeyDown={e => {
         if (e.nativeEvent.isComposing) return
         if (e.key === 'Escape') {setOpen(false); setActive(-1)}
         if (open && suggestions.length && ['ArrowDown', 'ArrowUp'].includes(e.key)) {e.preventDefault(); setActive(a => (a + (e.key === 'ArrowDown' ? 1 : -1) + suggestions.length) % suggestions.length)}
         if (e.key === 'Enter' && open && active >= 0 && suggestions[active]) {e.preventDefault(); choose(suggestions[active])}
       }} />
       {open && suggestions.length > 0 && <ul id="term-options" role="listbox" className="suggestions">{suggestions.map((t, i) => <li id={`term-${i}`} key={t} role="option" aria-selected={active === i} onMouseDown={e => e.preventDefault()} onClick={() => choose(t)}>{t}</li>)}</ul>}
-    </div><button className="primary" disabled={!value.trim()}>搜尋</button></div>
-    <div className="operators">{['AND','OR','NOT','(',')'].map(t => <button type="button" key={t} onClick={() => insert(t)}>{t}</button>)}<button type="button" className="quiet" onClick={() => {onChange(''); setOpen(false); input.current.focus()}}>清除</button></div>
+    </div><button className="primary" disabled={!value.trim()}>Search</button></div>
+    <div className="operators">{['AND','OR','NOT','(',')'].map(t => <button type="button" key={t} onClick={() => insert(t)}>{t}</button>)}<button type="button" className="quiet" onClick={() => {onChange(''); setOpen(false); input.current.focus()}}>Clear</button></div>
     {status && !terms.length && (
       <p className="muted" role="status">{status}</p>
     )}

@@ -4,6 +4,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css' // 沒有這檔可刪掉這行
 
+// This component intentionally lives beside the root render.
+// eslint-disable-next-line react-refresh/only-export-components
 function ErrorBoundary({ children }) {
   const [err, setErr] = React.useState(null)
   React.useEffect(() => {
@@ -18,7 +20,7 @@ function ErrorBoundary({ children }) {
   if (err) {
     return (
       <div style={{padding:16, fontFamily:'ui-sans-serif'}}>
-        <h2>🚨 執行期錯誤</h2>
+        <h2>Application error</h2>
         <pre style={{whiteSpace:'pre-wrap', background:'#f5f5f5', padding:12, borderRadius:8}}>
 {String(err?.stack || err?.message || err)}
         </pre>

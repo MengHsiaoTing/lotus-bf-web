@@ -743,3 +743,20 @@ footer {
     display: none;
   }
 }
+/* Results map tabs and slice controls */
+.brain-tabs {display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.brain-tabs [aria-selected="true"] {background:#12778a;color:white;border-color:#12778a}
+.result-brain [hidden] {display:none!important}
+.slice-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:start}
+.slice-grid p {font-size:12px;margin:12px 0 6px}
+.slice-slider {width:100%;min-width:0;margin:10px 0}
+.slice-coordinate-fields {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.slice-coordinate-fields label {font-size:12px;min-width:0}
+.slice-coordinate-fields input {display:block;width:100%;min-width:0;padding:7px;border:1px solid #b8cdd7;border-radius:6px}
+.map-control {display:flex;align-items:center;gap:8px;font-size:12px;margin:12px 0;flex-wrap:wrap}
+.map-control input[type="range"] {flex:1;min-width:70px}
+.distribution-controls {display:flex;flex-wrap:wrap;gap:10px;font-size:12px}
+.distribution-controls input[type="number"] {max-width:100px}
+.result-brain .brain-viewer input[type="number"] {max-width:100px}
+.result-brain select,.result-brain input {max-width:100%}
+@media(max-width:420px) {.slice-grid{gap:5px}.slice-grid p{font-size:10px}.brain-tabs button{padding:8px 10px}}

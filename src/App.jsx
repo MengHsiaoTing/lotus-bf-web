@@ -4,6 +4,7 @@ import { SearchBox } from './components/SearchBox'
 import { Studies } from './components/Studies'
 import { BrainViewer } from './components/BrainViewer'
 import './App.css'
+import { ResultBrain } from './components/ResultBrain'
 import { SlicePicker } from './components/SlicePicker'
 
 function CoordinateSearch({ query, radius, onSearch, showPicker }) {
@@ -18,15 +19,15 @@ function CoordinateSearch({ query, radius, onSearch, showPicker }) {
   }
   return <>
     <form className="search-form" onSubmit={submit}>
-      <p className="coordinate-label">MNI 座標（mm）</p>
+      <p className="coordinate-label">MNI coordinates (mm)</p>
       <div className="coordinate-fields">
         {['X','Y','Z'].map((axis,i)=><label key={axis}>{axis}<input type="number" step="any" required value={coords[i]} onChange={e=>setCoords(old=>old.map((v,j)=>i===j?e.target.value:v))}/></label>)}
       </div>
-      <label style={{display:'block',marginTop:16}}>搜尋半徑（mm） <input type="number" min="0.1" max="50" step="0.1" required value={r} onChange={e=>setR(e.target.value)}/></label>
-      <button type="submit" className="primary coordinate-submit">搜尋此位置 →</button>
-      <p className="muted">搜尋具有活化點距離此位置小於指定半徑的文獻。圖層門檻與遮罩不影響文獻篩選。</p>
+      <label style={{display:'block',marginTop:16}}>Search radius (mm) <input type="number" min="0.1" max="50" step="0.1" required value={r} onChange={e=>setR(e.target.value)}/></label>
+      <button type="submit" className="primary coordinate-submit">Search this location →</button>
+      <p className="muted">Find studies with reported coordinates within the selected radius. Display thresholds do not filter studies.</p>
     </form>
-    {showPicker && <section className="card" style={{marginTop:20}}><h2>選擇搜尋位置</h2>
+    {showPicker && <section className="card" style={{marginTop:20}}><h2>Choose a location</h2>
       <SlicePicker point={point} onChange={p=>setCoords(p.map(String))}/>
     </section>}
   </>
@@ -82,25 +83,25 @@ export default function App() {
         </h1>
 
         <BrainViewer autoRotate />
-        <p className="muted">建議使用 Chrome、Edge 或 Firefox，以獲得較佳的 3D 瀏覽體驗。</p>
+        <p className="muted">Chrome, Edge or Firefox is recommended for the best 3D viewing experience.</p>
 
         <div className="entry-buttons" style={{display:'flex',justifyContent:'center',flexWrap:'wrap',gap:20}}>
-          <button className="primary enter" onClick={() => navigate('search', '', 'terms')}>詞彙查詢</button>
-          <button className="primary enter" onClick={() => navigate('search', '', 'coordinates')}>座標查詢</button>
+          <button className="primary enter" onClick={() => navigate('search', '', 'terms')}>Term search</button>
+          <button className="primary enter" onClick={() => navigate('search', '', 'coordinates')}>Coordinate search</button>
         </div>
       </div>
     </main> : <main className={route.page === 'search' ? 'search-page' : 'results-page'}>
       {route.page === 'search' && <>
         <h1 className="eyebrow" style={{fontSize:'clamp(22px, 3vw, 34px)',fontWeight:700,lineHeight:1.4,letterSpacing:'0.12em',margin:'0 0 20px'}}>{route.mode === 'coordinates' ? 'BRAIN LOCATION SEARCH' : 'BRAIN FUNCTION SEARCH'}</h1>
-        <p className="intro">{route.mode === 'coordinates' ? '輸入 X、Y、Z，尋找此位置附近的相關研究。' : '輸入關鍵詞，尋找相關研究。'}</p>
+        <p className="intro">{route.mode === 'coordinates' ? 'Enter X, Y and Z or select a location on the slices.' : 'Enter keywords to find related studies.'}</p>
       </>}
       {route.mode === 'coordinates'
         ? <CoordinateSearch showPicker={route.page === 'search'} key={`${route.q}-${route.revision || 0}`} query={route.q} radius={route.radius} onSearch={(q,r) => navigate('results', q, 'coordinates',r)} />
         : <SearchBox value={draft} onChange={setDraft} onSearch={q => navigate('results', q, 'terms')} showMarquee={route.page === 'search'} />}
 
       {route.page === 'results' && <>
-        <p className="query-caption">搜尋結果：<strong>{route.q}</strong></p>
-        <div className="results-grid"><section className="card"><Studies key={`${route.q}-${route.revision || 0}`} query={route.q} radius={route.radius} /></section><aside className="card brain-panel"><h2>3D 腦影像</h2><BrainViewer key={`${route.q}-${route.revision || 0}`} query={route.q} radius={route.radius} /><p className="muted">拖曳旋轉，滾輪縮放。紅點為文獻報告的 MNI 座標；可降低大腦透明度查看內部紅點，並非統計顯著性圖。</p></aside></div>
+        <p className="query-caption">Search results: <strong>{route.q}</strong></p>
+        <div className="results-grid"><section className="card"><Studies key={`${route.q}-${route.revision || 0}`} query={route.q} radius={route.radius} /></section><aside className="card brain-panel"><ResultBrain key={`${route.q}-${route.revision || 0}`} query={route.q} radius={route.radius}/></aside></div>
       </>}
     </main>}
   </div>

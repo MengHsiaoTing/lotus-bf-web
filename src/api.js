@@ -17,7 +17,7 @@ export async function apiFetch(path, { signal, timeout = 60000 } = {}) {
     }
     return { json: async () => JSON.parse(await blob.text()), blob: async () => blob, headers: response.headers }
   } catch (error) {
-    if (timedOut) throw new Error('等待超過 60 秒，服務可能正在啟動，請稍後重新搜尋')
+    if (timedOut) throw new Error('The request timed out. The service may be starting; please try again.')
     throw error
   } finally {
     clearTimeout(timer)

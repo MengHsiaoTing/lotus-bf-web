@@ -99,9 +99,9 @@ function installBrainGestures(element, { toggle, pause, reset }) {
   }
 }
 
-export function BrainViewer({query = '', autoRotate = false, radius = 6}) {
+export function BrainViewer({query = '', autoRotate = false, radius = 6, coordinateRows = null, active = true}) {
   const canvas = useRef(null), viewer = useRef(null), container = useRef(null), enlarge = useRef(null)
-  const [status, setStatus] = useState('載入大腦影像中…'), [error, setError] = useState('')
+  const [status, setStatus] = useState('Loading brain image…'), [error, setError] = useState('')
   const [expanded, setExpanded] = useState(false), [rotating, setRotating] = useState(autoRotate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const rotatingRef = useRef(rotating)
   useEffect(() => {
@@ -142,6 +142,9 @@ export function BrainViewer({query = '', autoRotate = false, radius = 6}) {
       forceDevicePixelRatio: 1,
     })
     let observer
+    const element=canvas.current
+    const contextLost=()=>{if(!disposed){setError('The 3D graphics connection was lost. Use 2D slices or try another browser.');setStatus('')}}
+    element.addEventListener('webglcontextlost',contextLost)
     async function load() {
       try {
         // Defer attachment so React StrictMode's discarded effect cannot own this canvas.
@@ -161,12 +164,15 @@ export function BrainViewer({query = '', autoRotate = false, radius = 6}) {
           await nv.setVolumeRenderIllumination(0)
           if (disposed) return
         }
-        setStatus(query ? '載入文獻座標中…' : '')
+        setStatus(query ? 'Loading study coordinates…' : '')
         if (query) {
           // Coordinates remain in their original world (MNI millimetre) positions.
-          const res = await apiFetch(`/query/${encodeURIComponent(query)}/locations?limit=5000&offset=0&r=${radius}`, {signal: ac.signal})
-          const data = await res.json(); if (disposed) return
-          const rows = data.results || []
+          let rows = coordinateRows
+          if (!rows) {
+            const res = await apiFetch(`/query/${encodeURIComponent(query)}/locations?limit=5000&offset=0&r=${radius}`, {signal: ac.signal})
+            rows = (await res.json()).results || []
+          }
+          if (disposed) return
           const unique = new Map()
           for (const row of rows) {
             const point = [row.x, row.y, row.z]
@@ -180,23 +186,24 @@ export function BrainViewer({query = '', autoRotate = false, radius = 6}) {
           setLayerData({nv,nodes})
           nv.setOpacity(0, 0.35)
           setAnatomyOpacity(0.35); setOpacity(1)
-          setStatus(nodes.length ? `顯示 ${nodes.length} 個不重複座標紅點。${rows.length === 5000 ? '為維持效能，目前僅載入前 5,000 筆座標，請縮小搜尋範圍查看更完整結果。' : ''}` : '此查詢沒有可顯示的腦部座標。')
+          setStatus(nodes.length ? `${nodes.length} unique coordinates. ${rows.length === 5000 ? 'Limited to the first 5,000 coordinate records. Narrow your query to see more complete results.' : ''}` : 'No coordinates available for this query.')
         }
-      } catch(e) {if (!disposed) {setError(`${e.message}；可繼續使用文獻搜尋。`); setStatus('')}}
+      } catch(e) {if (!disposed) {setError(`${e.message}. Study search is still available.`); setStatus('')}}
       finally {loaded = true; if (disposed) nv.cleanup()}
     }
     load()
-    return () => {disposed = true; ac.abort(); observer?.disconnect(); if (viewer.current === nv) viewer.current = null; if (loaded) nv.cleanup(); urls.forEach(url => URL.revokeObjectURL(url))}
-  }, [query, autoRotate, radius])
+    return () => {disposed = true; element.removeEventListener('webglcontextlost',contextLost); ac.abort(); observer?.disconnect(); if (viewer.current === nv) viewer.current = null; if (loaded) nv.cleanup(); urls.forEach(url => URL.revokeObjectURL(url))}
+  }, [query, autoRotate, radius, coordinateRows])
   useEffect(() => {
-    if (!rotating) return
+    if (!rotating || !active) return
     let frame, last = 0
     const tick = now => {
       if (viewer.current && rotatingRef.current && !document.hidden && now-last > 40) {const nv = viewer.current; nv.setRenderAzimuthElevation((nv.scene.renderAzimuth + 0.45) % 360, nv.scene.renderElevation); last = now}
       frame = requestAnimationFrame(tick)
     }
     frame = requestAnimationFrame(tick); return () => cancelAnimationFrame(frame)
-  }, [rotating])
+  }, [rotating, active])
+  useEffect(() => { if (active) viewer.current?.resizeListener() }, [active])
   useEffect(() => {
     if (!expanded) return
     const old = document.body.style.overflow; document.body.style.overflow = 'hidden'
@@ -210,12 +217,12 @@ export function BrainViewer({query = '', autoRotate = false, radius = 6}) {
     document.addEventListener('keydown', key)
     return () => {document.body.style.overflow = old; document.removeEventListener('keydown', key); previous?.focus()}
   }, [expanded])
-  return <div ref={container} className={`brain-viewer ${expanded ? 'expanded' : ''}`} role={expanded ? 'dialog' : undefined} aria-modal={expanded ? true : undefined} aria-label="可旋轉的 3D 腦影像">
-    <div className="brain-canvas"><canvas ref={canvas} tabIndex={0} style={{outline: 'none'}} aria-label="3D 大腦：單擊切換自動旋轉，拖曳調整視角，雙擊重設。鍵盤空白鍵切換旋轉，Home 重設。" title="單擊：旋轉／暫停；拖曳：調整視角；雙擊：重設" /></div>
+  return <div ref={container} className={`brain-viewer ${expanded ? 'expanded' : ''}`} role={expanded ? 'dialog' : undefined} aria-modal={expanded ? true : undefined} aria-label="Interactive 3D brain">
+    <div className="brain-canvas"><canvas ref={canvas} tabIndex={0} style={{outline: 'none'}} aria-label="3D brain: click to toggle rotation, drag to rotate, double-click to reset. Space toggles rotation; Home resets the view." title="Click: rotate/pause; drag: change view; double-click: reset" /></div>
     {status && <p className="brain-status" role="status">{status}</p>}{error && <p className="brain-status error" role="alert">{error}</p>}
-    {!autoRotate && <div className="brain-tools"><button ref={enlarge} onClick={() => setExpanded(v => !v)}>{expanded ? '關閉放大 ×' : '放大檢視 ⤢'}</button></div>}
+    {!autoRotate && <div className="brain-tools"><button ref={enlarge} onClick={() => setExpanded(v => !v)}>{expanded ? 'Close expanded view ×' : 'Expand ⤢'}</button></div>}
     {query && layerData && <ViewerLayers key={`${query}-${radius}`} nv={layerData.nv} nodes={layerData.nodes} query={query} radius={radius}/>}
-    {query && <label className="opacity">大腦透明度 <input type="range" min="0.1" max="1" step="0.05" value={anatomyOpacity} onChange={e => {setAnatomyOpacity(Number(e.target.value)); if (viewer.current?.volumes.length) viewer.current.setOpacity(0, Number(e.target.value))}} /></label>}
-    {query && <label className="opacity">紅點透明度 <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => {setOpacity(Number(e.target.value)); if (viewer.current?.meshes.length) viewer.current.setMeshProperty(viewer.current.meshes[0].id, 'opacity', Number(e.target.value))}} /></label>}
+    {query && <label className="opacity">Brain opacity <input type="range" min="0.1" max="1" step="0.05" value={anatomyOpacity} onChange={e => {setAnatomyOpacity(Number(e.target.value)); if (viewer.current?.volumes.length) viewer.current.setOpacity(0, Number(e.target.value))}} /></label>}
+    {query && <label className="opacity">Point opacity <input type="range" min="0" max="1" step="0.05" value={opacity} onChange={e => {setOpacity(Number(e.target.value)); if (viewer.current?.meshes.length) viewer.current.setMeshProperty(viewer.current.meshes[0].id, 'opacity', Number(e.target.value))}} /></label>}
   </div>
 }
