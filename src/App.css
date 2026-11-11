@@ -480,6 +480,9 @@ footer {
 .brain-panel {
   position: sticky;
   top: 20px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .brain-viewer {
@@ -616,7 +619,9 @@ footer {
   }
 
   .brain-panel {
-    position: static;
+   position: static;
+   max-height: none;
+   overflow: visible;
   }
 
   .brain-canvas {
